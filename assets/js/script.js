@@ -8,12 +8,17 @@ var taskIdCounter = 0;
 
 
 
+
 var taskFormHandler = function(event){
     event.preventDefault();
     //console.log(event);
 
     var taskNameInput = document.querySelector("input[name='task-name']").value;
     var taskTypeInput = document.querySelector("select[name='task-type']").value;
+    
+    //check if the form is being used to edit 
+    var isEdit = formEl.hasAttribute("data-task-id");
+    
     
     if(!taskNameInput || !taskTypeInput){
         alert("Need to fill out the task form")
@@ -22,15 +27,40 @@ var taskFormHandler = function(event){
 
     formEl.reset();
 
-    // package up data as an object
-    var dataObj = {
-        name: taskNameInput,
-        type: taskTypeInput
-    };
+    
 
     // send it as an argument to create task El
-    createTaskEl(dataObj);
+    if(isEdit){
+        var taskId = formEl.getAttribute("data-task-id");
+        comepleteEditTask(taskNameInput, taskTypeInput, taskId);
+    } else {
+        // package up data as an object
+        var dataObj = {
+        name: taskNameInput,
+        type: taskTypeInput
+        };
+
+        createTaskEl(dataObj);
+    }
+
+    
 }
+
+var comepleteEditTask = function(taskName, taskType, taskId) {
+    // find list item with task id
+    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+
+    // set values from the form in the header
+    taskSelected.querySelector("h3.task-name").textContent = taskName;
+    taskSelected.querySelector("span.task-type").textContent = taskType;
+
+    window.alert("Task " + taskId + " Updated!");
+
+    formEl.removeAttribute("task-data-id");
+    document.querySelector("#save-task").textContent = "Add Task";
+
+};
+
 
 var createTaskEl = function(dataObj){
      // build a list item 
