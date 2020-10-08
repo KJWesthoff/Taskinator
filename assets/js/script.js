@@ -298,6 +298,71 @@ var saveTasks = function(){
     localStorage.setItem("tasks", JSON.stringify(tasksArr));
 }
 
+var loadTasks = function(){
+    
+    // load from storage
+    var taskJSON = localStorage.getItem("tasks");
+    
+    //console.log(taskJSON);
+    
+    // check id empty
+    if(taskJSON === null){
+        console.log("null found in storage")
+        tasksArr = [];
+        return false;
+    }
+
+    // array-ify
+    tasksArr = JSON.parse(taskJSON);
+    
+    // creat dom elements
+    for(i=0 ; i < tasksArr.length; i++){
+        taskIdCounter = tasksArr[i].id;
+        console.log(tasksArr[i]);
+
+
+        // build a list item 
+        var listItemEl = document.createElement("li");
+        listItemEl.className = "task-item";   
+        listItemEl.setAttribute("draggable", "true");
+        listItemEl.setAttribute("data-task-id", tasksArr[i].id);
+        //console.log(listItemEl);
+
+        //put the content in div
+        var taskInfoEl = document.createElement("div");
+        taskInfoEl.className = "task-info";
+        taskInfoEl.innerHTML = "<h3 class='task-name'>" + tasksArr[i].name + "</h3><span class='task-type'>" + tasksArr[i].type + "</span>";
+        
+
+         // put the package in the li item
+        listItemEl.appendChild(taskInfoEl);
+
+        // build the task element and append to list element
+        var taskActionsEl = createTaskActions(tasksArr[i].id);
+        listItemEl.appendChild(taskActionsEl);
+        
+        if(tasksArr[i].status === "to do"){
+            listItemEl.querySelector("select[name='status-change']").selectedIndex = 0;
+            // add the whole schabang as a child to "to do"
+            tasksToDoEl.appendChild(listItemEl);
+        } else if (tasksArr[i].status === "in progress"){
+            listItemEl.querySelector("select[name='status-change']").selectedIndex = 1;
+            // add the whole schabang as a child to "in progress"
+            tasksInProgressEl.appendChild(listItemEl);
+        } else if (tasksArr[i].status === "completed"){
+            listItemEl.querySelector("select[name='status-change']").selectedIndex = 2;
+            // add the whole schabang as a child "to completed"
+            tasksCompletedEl.appendChild(listItemEl);
+        }
+
+        taskIdCounter ++
+        console.log(listItemEl);
+
+    }
+
+
+
+}
 
 formEl.addEventListener("submit", taskFormHandler);
 
@@ -307,3 +372,5 @@ pageContentEl.addEventListener("dragstart", dragTaskHandler);
 pageContentEl.addEventListener("dragover", dropZoneDragHandler);
 pageContentEl.addEventListener("drop", dropTaskHandler);
 pageContentEl.addEventListener("dragleave", dragLeaveHandler);
+
+loadTasks();
