@@ -93,18 +93,37 @@ var createTaskEl = function(dataObj){
      // build the task element and append to list element
      var taskActionsEl = createTaskActions(taskIdCounter);
      listItemEl.appendChild(taskActionsEl);
-     // add the whole schabang as a child
-     tasksToDoEl.appendChild(listItemEl);
+     
+     console.log("Task actions at create el");
+     console.log(dataObj);
+    
+     // check status and set the correct index in the drop down
+     // add the whole as a child to status variable
+     if (dataObj.status === "to-do"){
+        listItemEl.querySelector("select[name='status-change']").selectedIndex = 0; 
+        tasksToDoEl.appendChild(listItemEl);
+     } else if(dataObj.status === "in progress") {
+        listItemEl.querySelector("select[name='status-change']").selectedIndex = 1;
+        tasksInProgressEl.appendChild(listItemEl);
+     } else if(dataObj.status === "completed") {
+        listItemEl.querySelector("select[name='status-change']").selectedIndex = 2;
+        tasksCompletedEl.appendChild(listItemEl);
+     } else {
+         console.log("unknown status")
+     }
+
 
      dataObj.id = taskIdCounter;
      tasksArr.push(dataObj);
-     saveTasks();
+     
 
      // add one to the task counter each time the function runs
      taskIdCounter += 1;
 
      console.log(dataObj);
      console.log(dataObj.status);
+
+     saveTasks();
 }
 
 var createTaskActions = function(taskId){
@@ -188,6 +207,7 @@ var editTask = function(taskId){
     document.querySelector("select[name='task-type']").value = taskType;
     document.querySelector("#save-task").textContent = "Save-Task";
     formEl.setAttribute("data-task-id", taskId);
+    saveTasks();
 }
 
 var deleteTask = function(taskId){
@@ -207,11 +227,11 @@ var deleteTask = function(taskId){
       
       // reassign tasks array to be the same as updatedTaskArr
       tasksArr = updatedArr;
-
+      saveTasks();
 }
 
 var taskStatusChangeHandler = function(event){
-    console.log("youve ghchaaainged -man")
+   
     console.log(event.target);
     var taskId = event.target.getAttribute("data-task-id");
     var statusValue = event.target.value.toLowerCase();
@@ -228,7 +248,7 @@ var taskStatusChangeHandler = function(event){
       }
 
     // update task's in tasks array
-    for (var i = 0; i < tasks.length; i++) {
+    for (var i = 0; i < tasksArr.length; i++) {
         if (tasksArr[i].id === parseInt(taskId)) {
             tasksArr[i].status = statusValue;
         }
@@ -301,65 +321,22 @@ var saveTasks = function(){
 var loadTasks = function(){
     
     // load from storage
-    var taskJSON = localStorage.getItem("tasks");
+    var storedTasks = localStorage.getItem("tasks");
     
     //console.log(taskJSON);
     
     // check id empty
-    if(taskJSON === null){
-        console.log("null found in storage")
-        tasksArr = [];
+    if(!storedTasks){
         return false;
-    }
+    } else 
 
     // array-ify
-    tasksArr = JSON.parse(taskJSON);
+    storedTasks = JSON.parse(storedTasks);
     
-    // creat dom elements
-    for(i=0 ; i < tasksArr.length; i++){
-        taskIdCounter = tasksArr[i].id;
-        console.log(tasksArr[i]);
-
-
-        // build a list item 
-        var listItemEl = document.createElement("li");
-        listItemEl.className = "task-item";   
-        listItemEl.setAttribute("draggable", "true");
-        listItemEl.setAttribute("data-task-id", tasksArr[i].id);
-        //console.log(listItemEl);
-
-        //put the content in div
-        var taskInfoEl = document.createElement("div");
-        taskInfoEl.className = "task-info";
-        taskInfoEl.innerHTML = "<h3 class='task-name'>" + tasksArr[i].name + "</h3><span class='task-type'>" + tasksArr[i].type + "</span>";
-        
-
-         // put the package in the li item
-        listItemEl.appendChild(taskInfoEl);
-
-        // build the task element and append to list element
-        var taskActionsEl = createTaskActions(tasksArr[i].id);
-        listItemEl.appendChild(taskActionsEl);
-        
-        if(tasksArr[i].status === "to do"){
-            listItemEl.querySelector("select[name='status-change']").selectedIndex = 0;
-            // add the whole schabang as a child to "to do"
-            tasksToDoEl.appendChild(listItemEl);
-        } else if (tasksArr[i].status === "in progress"){
-            listItemEl.querySelector("select[name='status-change']").selectedIndex = 1;
-            // add the whole schabang as a child to "in progress"
-            tasksInProgressEl.appendChild(listItemEl);
-        } else if (tasksArr[i].status === "completed"){
-            listItemEl.querySelector("select[name='status-change']").selectedIndex = 2;
-            // add the whole schabang as a child "to completed"
-            tasksCompletedEl.appendChild(listItemEl);
-        }
-
-        taskIdCounter ++
-        console.log(listItemEl);
-
+    // loop through savedTasks array
+    for (var i = 0; i < storedTasks.length; i++){
+        createTaskEl(storedTasks[i]);
     }
-
 
 
 }
